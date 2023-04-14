@@ -1,8 +1,10 @@
-import "./index.css";
+import Header from "./components/Header";
+import Cards from "./components/Cards";
 function App() {
   return (
     <div className="App">
-      <h1 className="text-orange-600">Filmyverse</h1>
+      <Header />
+      <Cards />
     </div>
   );
 }
