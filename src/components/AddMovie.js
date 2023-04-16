@@ -1,11 +1,37 @@
 import React from "react";
 import { useState } from "react";
+import { TailSpin } from "react-loader-spinner";
+import { addDoc } from "firebase/firestore";
+import { moviesRef } from "../firebase/firebase";
+import swal from "sweetalert";
+
 const AddMovie = () => {
-  const [htmlForm, sethtmlForm] = useState({
+  const [form, setForm] = useState({
     title: "",
     year: "",
     description: "",
+    image: "",
   });
+  const [loading, setLoading] = useState(false);
+
+  const AddMovie = async () => {
+    setLoading(true);
+    await addDoc(moviesRef, form);
+    swal({
+      title: "Successfully Added",
+      icon: "success",
+      buttons: false,
+      timer: 3000,
+    });
+    setForm({
+      title: "",
+      year: "",
+      description: "",
+      image: "",
+    });
+    setLoading(false);
+  };
+
   return (
     <div>
       <section className="text-gray-600 body-font relative">
@@ -29,9 +55,9 @@ const AddMovie = () => {
                     type="text"
                     id="name"
                     name="name"
-                    value={htmlForm.title}
+                    value={form.title}
                     onChange={(e) =>
-                      sethtmlForm({ ...htmlForm, title: e.target.value })
+                      setForm({ ...form, title: e.target.value })
                     }
                     className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                   />
@@ -49,12 +75,29 @@ const AddMovie = () => {
                     type="email"
                     id="email"
                     name="email"
-                    value={htmlForm.year}
-                    onChange={(e) =>
-                      sethtmlForm({ ...htmlForm, year: e.target.value })
-                    }
+                    value={form.year}
+                    onChange={(e) => setForm({ ...form, year: e.target.value })}
                     className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
                   />
+                </div>
+              </div>
+              <div className="p-2 w-full">
+                <div className="relative">
+                  <label
+                    htmlFor="message"
+                    className="leading-7 text-sm text-gray-300"
+                  >
+                    Image Link
+                  </label>
+                  <input
+                    id="message"
+                    name="message"
+                    value={form.image}
+                    onChange={(e) =>
+                      setForm({ ...form, image: e.target.value })
+                    }
+                    className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                  ></input>
                 </div>
               </div>
               <div className="p-2 w-full">
@@ -68,17 +111,20 @@ const AddMovie = () => {
                   <textarea
                     id="message"
                     name="message"
-                    value={htmlForm.description}
+                    value={form.description}
                     onChange={(e) =>
-                      sethtmlForm({ ...htmlForm, description: e.target.value })
+                      setForm({ ...form, description: e.target.value })
                     }
                     className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"
                   ></textarea>
                 </div>
               </div>
               <div className="p-2 w-full">
-                <button className="flex mx-auto text-white bg-green-600 border-0 py-2 px-8 focus:outline-none hover:bg-green-700 rounded text-lg">
-                  Submit
+                <button
+                  onClick={AddMovie}
+                  className="flex mx-auto text-white bg-green-600 border-0 py-2 px-8 focus:outline-none hover:bg-green-700 rounded text-lg"
+                >
+                  {loading ? <TailSpin height={25} color="white" /> : "Submit"}
                 </button>
               </div>
             </div>
