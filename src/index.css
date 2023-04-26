@@ -13,4 +13,5 @@ body{
 
 .card{
     background: rgb(19, 19, 19);
+    width: 230px;
 }

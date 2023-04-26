@@ -35,13 +35,18 @@ const Cards = () => {
                 key={i}
                 className="card font-medium shadow-lg p-2 hover:-translate-y-3 cursor-pointer mt-6 transition-all duration-500"
               >
-                <img className="h-60 md:h-72" src={e.image} alt="" />
+                <img className="w-full h-60 md:h-72 " src={e.image} alt="" />
                 <h1>
-                  <span className="text-gray-500">Name:</span> {e.title}
+                  <span className="text-gray-500 ">Name:</span> {e.title}
                 </h1>
                 <h1 className="flex items-center">
                   <span className="text-gray-500 mr-1">Rating:</span>
-                  <ReactStars size={20} half={true} value={5} edit={false} />
+                  <ReactStars
+                    size={20}
+                    half={true}
+                    value={e.rating / e.rated}
+                    edit={false}
+                  />
                 </h1>
                 <h1>
                   <span className="text-gray-500">Year:</span> {e.year}

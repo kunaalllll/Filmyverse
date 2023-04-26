@@ -13,6 +13,8 @@ const Detail = () => {
     year: "",
     image: "",
     description: "",
+    rating: 0,
+    rated: 0,
   });
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -41,11 +43,20 @@ const Detail = () => {
               <span className="text-xl ml-1">({data.year})</span>
             </h1>
 
-            <ReactStars size={20} half={true} value={4.5} edit={false} />
+            <ReactStars
+              size={20}
+              half={true}
+              value={data.rating / data.rated}
+              edit={false}
+            />
 
             <p className="mt-2">{data.description}</p>
 
-            <Reviews id={id} />
+            <Reviews
+              id={id}
+              prevRating={data.rating || 0}
+              userRated={data.rated || 0}
+            />
           </div>
         </>
       )}

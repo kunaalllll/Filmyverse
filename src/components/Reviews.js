@@ -1,34 +1,63 @@
-import React from "react";
+import React, { useEffect, useContext, useState } from "react";
 import ReactStars from "react-stars";
-import { useState } from "react";
-import { reviewsRef } from "../firebase/firebase";
-import { addDoc } from "firebase/firestore";
-import { TailSpin } from "react-loader-spinner";
+import { reviewsRef, db } from "../firebase/firebase";
+import {
+  addDoc,
+  doc,
+  updateDoc,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { TailSpin, ThreeDots } from "react-loader-spinner";
 import swal from "sweetalert";
+import { Appstate } from "../App";
+import { useNavigate } from "react-router-dom";
 
-const Reviews = (id) => {
+const Reviews = ({ id, prevRating, userRated }) => {
+  const useAppstate = useContext(Appstate);
+  const navigate = useNavigate();
   const [rating, setRating] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [form, setForm] = useState("");
+  const [data, setData] = useState([]);
+  const [newAdded, setNewAdded] = useState(0);
 
   const sendReview = async () => {
+    console.log("0", "db=", db, "id=", id);
+
     setLoading(true);
     try {
-      await addDoc(reviewsRef, {
-        movieid: id,
-        name: "kunal mathur",
-        rating: rating,
-        thought: form,
-        timestamp: new Date().getTime(),
-      });
-      setRating(0);
-      setForm("");
-      swal({
-        title: "Review Sent",
-        icon: "success",
-        buttons: false,
-        timer: 3000,
-      });
+      if (useAppstate.login) {
+        await addDoc(reviewsRef, {
+          movieid: id,
+          name: useAppstate.userName,
+          rating: rating,
+          thought: form,
+          timestamp: new Date().getTime(),
+        });
+
+        const ref = doc(db, "movies", id);
+        console.log("1", db, id);
+        await updateDoc(ref, {
+          rating: prevRating + rating,
+          rated: userRated + 1,
+        });
+        setRating(0);
+        setForm("");
+        setNewAdded(newAdded + 1);
+        console.log("2", db, id);
+
+        swal({
+          title: "Review Sent",
+          icon: "success",
+          buttons: false,
+          timer: 3000,
+        });
+      } else {
+        navigate("/login");
+      }
     } catch (error) {
       swal({
         title: error.message,
@@ -39,6 +68,21 @@ const Reviews = (id) => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    async function getData() {
+      setReviewsLoading(true);
+      setData([]);
+      let quer = query(reviewsRef, where("movieid", "==", id));
+      const querySnapshot = await getDocs(quer);
+
+      querySnapshot.forEach((doc) => {
+        setData((prev) => [...prev, doc.data()]);
+      });
+      setReviewsLoading(false);
+    }
+    getData();
+  }, [newAdded]);
   return (
     <div className="mt-4 border-t-2 border-gray-700 w-full">
       <ReactStars
@@ -59,6 +103,37 @@ const Reviews = (id) => {
       >
         {loading ? <TailSpin height={20} color="white" /> : "Share"}
       </button>
+
+      {reviewsLoading ? (
+        <div className="mt-6 flex justify-center">
+          <ThreeDots height={10} color="white" />
+        </div>
+      ) : (
+        <div>
+          {data.map((e, i) => {
+            return (
+              <div
+                className=" p-2 w-full border-b header bg-opacity-50 border-gray-600 mt-2"
+                key={i}
+              >
+                <div className="flex items-center">
+                  <p className="text-blue-500">{e.name}</p>
+                  <p className="ml-3 text-xs">
+                    {new Date(e.timestamp).toLocaleString()}
+                  </p>
+                </div>
+                <ReactStars
+                  size={15}
+                  half={true}
+                  value={e.rating}
+                  edit={false}
+                />
+                <p>{e.thought}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
